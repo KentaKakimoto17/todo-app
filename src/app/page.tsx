@@ -10,6 +10,7 @@ type Task = {
 export default function Home() {
   const [tasks, setTasks] = useState<Task[]>([])
   const [newTask, setNewTask] = useState('')
+  const [showCompleted, setShowCompleted] = useState(false)
 
   // 初回マウント時に localStorage からデータを読み込む
   useEffect(() => {
@@ -42,10 +43,32 @@ export default function Home() {
     setTasks(updated)
   }
 
+  const filteredTasks = tasks.filter((task) => {
+    if (showCompleted) {
+      return task.done
+    }
+    return !task.done
+  })
+
   return (
     <main className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
       <div className="bg-white shadow-lg rounded-lg p-6 w-full max-w-md">
         <h1 className="text-2xl font-bold mb-4 text-center">Todo App</h1>
+        <div className="flex justify-center mb-4">
+          <button
+            onClick={() => setShowCompleted(false)}
+            className={`px-4 py-2 ${!showCompleted ? 'bg-blue-500 text-white' : 'cursor-pointer bg-gray-300'}`}
+          >
+            Pending
+          </button>
+          <button
+            onClick={() => setShowCompleted(true)}
+            className={`px-4 py-2 ${showCompleted ? 'bg-blue-500 text-white' : 'cursor-pointer bg-gray-300'}`}
+          >
+            Done
+          </button>
+        </div>
+
         <div className="flex mb-4">
           <input
             type="text"
@@ -57,26 +80,31 @@ export default function Home() {
           />
           <button
             onClick={addTask}
-            className="bg-blue-500 text-white px-4 py-2 rounded-r hover:bg-blue-600"
+            className="cursor-pointer bg-blue-500 text-white px-4 py-2 rounded-r hover:bg-blue-600"
           >
             Add
           </button>
         </div>
         <ul>
-          {tasks.map((task, index) => (
+          {filteredTasks.map((task, index) => (
             <li key={index} className="flex items-center justify-between mb-2">
-              <span
-                className={`cursor-pointer ${task.done ? 'line-through text-gray-500' : ''}`}
-                onClick={() => toggleTask(index)}
-              >
+              <span className={`${task.done ? 'line-through text-gray-500' : ''}`}>
                 {task.text}
               </span>
-              <button
-                onClick={() => removeTask(index)}
-                className="text-red-500 hover:text-red-700"
-              >
-                ✕
-              </button>
+              <div className="ml-auto flex space-x-2">
+                <button
+                  onClick={() => toggleTask(index)}
+                  className={`cursor-pointer ${task.done ? 'line-through text-gray-500' : ''}`}
+                >
+                  ✓
+                </button>
+                <button
+                  onClick={() => removeTask(index)}
+                  className="cursor-pointer text-red-500 hover:text-red-700"
+                >
+                  ✕
+                </button>
+              </div>
             </li>
           ))}
         </ul>
