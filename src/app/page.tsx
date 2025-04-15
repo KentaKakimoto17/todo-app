@@ -11,8 +11,9 @@ export default function Home() {
   const [tasks, setTasks] = useState<Task[]>([])
   const [newTask, setNewTask] = useState('')
   const [showCompleted, setShowCompleted] = useState(false)
+  const [editingIndex, setEditingIndex] = useState<number | null>(null)
+  const [editingText, setEditingText] = useState('')
 
-  // 初回マウント時に localStorage からデータを読み込む
   useEffect(() => {
     const storedTasks = localStorage.getItem('tasks')
     if (storedTasks) {
@@ -20,7 +21,6 @@ export default function Home() {
     }
   }, [])
 
-  // tasks が変更されるたびに localStorage に保存
   useEffect(() => {
     localStorage.setItem('tasks', JSON.stringify(tasks))
   }, [tasks])
@@ -42,6 +42,23 @@ export default function Home() {
     updated.splice(index, 1)
     setTasks(updated)
   }
+
+  const startEditing = (index: number, currentText: string) => {
+    setEditingIndex(index)
+    setEditingText(currentText)
+  }
+
+  const finishEditing = (index: number) => {
+    if (!editingText.trim()) {
+      setEditingIndex(null)
+      return
+    }
+    const updated = [...tasks]
+    updated[index].text = editingText
+    setTasks(updated)
+    setEditingIndex(null)
+  }
+
 
   const filteredTasks = tasks.filter((task) => {
     if (showCompleted) {
@@ -88,15 +105,34 @@ export default function Home() {
         <ul>
           {filteredTasks.map((task, index) => (
             <li key={index} className="flex items-center justify-between mb-2">
-              <span className={`${task.done ? 'line-through text-gray-500' : ''}`}>
-                {task.text}
-              </span>
+              {editingIndex === index ? (
+                <input
+                  className="flex-grow border px-2 py-1 mr-2"
+                  value={editingText}
+                  onChange={(e) => setEditingText(e.target.value)}
+                  onBlur={() => finishEditing(index)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') finishEditing(index)
+                  }}
+                  autoFocus
+                />
+                ) : (
+                <span className={`flex-grow ${task.done ? 'line-through text-gray-500' : ''}`}>
+                  {task.text}
+                </span>
+              )}
               <div className="ml-auto flex space-x-2">
                 <button
                   onClick={() => toggleTask(index)}
                   className={`cursor-pointer ${task.done ? 'line-through text-gray-500' : ''}`}
                 >
                   ✓
+                </button>
+                <button
+                  onClick={() => startEditing(index, task.text)}
+                  className="cursor-pointer text-blue-500 hover:text-blue-700"
+                >
+                  🖋
                 </button>
                 <button
                   onClick={() => removeTask(index)}
