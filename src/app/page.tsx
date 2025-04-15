@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 type Task = {
   text: string
@@ -10,6 +10,19 @@ type Task = {
 export default function Home() {
   const [tasks, setTasks] = useState<Task[]>([])
   const [newTask, setNewTask] = useState('')
+
+  // 初回マウント時に localStorage からデータを読み込む
+  useEffect(() => {
+    const storedTasks = localStorage.getItem('tasks')
+    if (storedTasks) {
+      setTasks(JSON.parse(storedTasks))
+    }
+  }, [])
+
+  // tasks が変更されるたびに localStorage に保存
+  useEffect(() => {
+    localStorage.setItem('tasks', JSON.stringify(tasks))
+  }, [tasks])
 
   const addTask = () => {
     if (!newTask.trim()) return
@@ -51,10 +64,7 @@ export default function Home() {
         </div>
         <ul>
           {tasks.map((task, index) => (
-            <li
-              key={index}
-              className="flex items-center justify-between mb-2"
-            >
+            <li key={index} className="flex items-center justify-between mb-2">
               <span
                 className={`cursor-pointer ${task.done ? 'line-through text-gray-500' : ''}`}
                 onClick={() => toggleTask(index)}
