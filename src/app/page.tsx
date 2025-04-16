@@ -110,36 +110,46 @@ export default function Home() {
                   className="flex-grow border px-2 py-1 mr-2"
                   value={editingText}
                   onChange={(e) => setEditingText(e.target.value)}
-                  onBlur={() => finishEditing(index)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') finishEditing(index)
                   }}
                   autoFocus
                 />
                 ) : (
-                <span className={`flex-grow ${task.done ? 'line-through text-gray-500' : ''}`}>
+                <span onClick={() => startEditing(index, task.text)} className={`flex-grow ${task.done ? 'line-through text-gray-500' : ''}`}>
                   {task.text}
                 </span>
               )}
               <div className="ml-auto flex space-x-2">
-                <button
-                  onClick={() => toggleTask(index)}
-                  className={`cursor-pointer ${task.done ? 'line-through text-gray-500' : ''}`}
-                >
-                  ✓
-                </button>
-                <button
-                  onClick={() => startEditing(index, task.text)}
-                  className="cursor-pointer text-blue-500 hover:text-blue-700"
-                >
-                  🖋
-                </button>
-                <button
-                  onClick={() => removeTask(index)}
-                  className="cursor-pointer text-red-500 hover:text-red-700"
-                >
-                  ✕
-                </button>
+                {editingIndex === index ? (
+                  <button
+                    onClick={() => finishEditing(index)}
+                    className="cursor-pointer text-green-500 hover:text-green-700"
+                  >
+                    Save
+                  </button>
+                  ) : (
+                  <>
+                    <button
+                      onClick={() => toggleTask(index)}
+                      className={`cursor-pointer ${task.done ? 'line-through text-gray-500' : ''}`}
+                    >
+                      ✓
+                    </button>
+                    <button
+                      onClick={() => startEditing(index, task.text)}
+                      className="cursor-pointer text-blue-500 hover:text-blue-700"
+                    >
+                      🖋
+                    </button>
+                    <button
+                      onClick={() => removeTask(index)}
+                      className="cursor-pointer text-red-500 hover:text-red-700"
+                    >
+                      ✕
+                    </button>
+                  </>
+                )}
               </div>
             </li>
           ))}
